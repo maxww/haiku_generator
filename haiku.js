@@ -17,14 +17,15 @@ module.exports = {
 					}
 				}
 				if (sylbsArr) {
-					finalHaiku.push(sylbsArr[sylbs][randomPosition()]);
+					finalHaiku.push(sylbsArr[sylbs][randomPosition()], " ");
 				} else {
-					finalHaiku.push(module.exports.library[sylbs][randomPosition()]);
+					finalHaiku.push(module.exports.library[sylbs][randomPosition()], " ");
 				}
 
 			})
+			finalHaiku.push("\n");
 		});
-		console.log(finalHaiku.join("\n"));
+		console.log(finalHaiku.join(""));
 	},
 	readCmudictFile: function (file) {
 		return fs.readFileSync(file).toString();
