@@ -1,16 +1,23 @@
 var fs = require("fs");
-
+var syllable = require("syllable");
 
 module.exports = {
-	library: {},
-	createHaiku: function (structure, sylbsArr) {
+	createHaiku: function (structure, textFile) {
+		// if textFile is CMU dictionary
+		if (textFile === "cmudict.txt") {
+			textFile = this.readCmudictFile(textFile);
+			textFile = this.formatData(textFile);
+		} else {
+			// if the textFile is just unsorted (by syllables) text
+			textFile = this.getWords(textFile);
+		}
 		var finalHaiku = [];
 		structure.forEach(function (line) {
 			line.forEach(function (sylbs) {
 				var randomPosition = function () {
-					return Math.floor(Math.random() * (sylbsArr[sylbs].length - 1 + 0 + 1) + 0);
+					return Math.floor(Math.random() * (textFile[sylbs].length - 1 + 0 + 1) + 0);
 				}
-				finalHaiku.push(sylbsArr[sylbs][randomPosition()], " ");
+				finalHaiku.push(textFile[sylbs][randomPosition()], " ");
 			})
 			finalHaiku.push("\n");
 		});
@@ -19,29 +26,6 @@ module.exports = {
 	readCmudictFile: function (file) {
 		return fs.readFileSync(file).toString();
 	},
-	// pass the cmudict data to create a library in the global environment
-	generateLibrary: function (data) {
-		var lines = data.toString().split("\n");
-		var lineSplit;
-		lines.forEach(function (line) {
-			lineSplit = line.split("  ");
-			var word = lineSplit[0];
-			var phoneme = lineSplit[1];
-
-			if (phoneme.match(/\d/g) !== null) {
-				var sylbs = phoneme.match(/\d/g).length;
-				if (sylbs < 8) {
-					if (!module.exports.library[sylbs]) {
-						module.exports.library[sylbs] = [];
-						module.exports.library[sylbs].push(word);
-					} else {
-						module.exports.library[sylbs].push(word);
-					}
-				}
-			}
-		});
-	},
-	// can be reused for any data
 	formatData: function (data) {
 		var library = {};
 		var lines = data.toString().split("\n");
@@ -50,7 +34,6 @@ module.exports = {
 			lineSplit = line.split("  ");
 			var word = lineSplit[0];
 			var phoneme = lineSplit[1];
-
 			if (phoneme.match(/\d/g) !== null) {
 				var sylbs = phoneme.match(/\d/g).length;
 				if (sylbs < 8) {
@@ -65,26 +48,18 @@ module.exports = {
 		});
 		return library;
 	},
-	// import a book and see sort the words into an object sorted by sylbs. 
-	getWordsFromBook: function (data) {
+	getWords: function (data) {
+		data = this.readCmudictFile(data);
 		var wordsFromBook = {};
-		// remove "\n", space, and commas
-		var booksWords = data.toString().split("\n").join().split(" ").join().split(",");
-		// loop over the cmudict library, and see if words from the book can be found inside the library
-		// problem is looping the library object takes very long time, so I cannot import a very long text(book) to compare with the library. Want to know if there's a better way to do it.
-		for (var sylbs in module.exports.library) {
-			module.exports.library[sylbs].forEach(function (guidWord) {
-				booksWords.forEach(function (bookWord) {
-					if (guidWord.toLowerCase() === bookWord.toLowerCase()) {
-						if (!wordsFromBook[sylbs]) {
-							wordsFromBook[sylbs] = [];
-							wordsFromBook[sylbs].push(bookWord.toUpperCase());
-						} else {
-							wordsFromBook[sylbs].push(bookWord.toUpperCase());
-						}
-					}
-				});
-			});
+		var booksWords = data.toString().replace(/\W|\d/g, " ").split(" ");
+		for (var i = 0; i < booksWords.length; i++) {
+			var sylbs = syllable(booksWords[i]);
+			if (!wordsFromBook[sylbs]) {
+				wordsFromBook[sylbs] = [];
+				wordsFromBook[sylbs].push(booksWords[i].toUpperCase());
+			} else {
+				wordsFromBook[sylbs].push(booksWords[i].toUpperCase());
+			}
 		}
 		return wordsFromBook;
 	}
