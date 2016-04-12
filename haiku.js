@@ -30,7 +30,6 @@ module.exports = {
 		return fs.readFileSync(file).toString();
 	},
 	formatData: function (data) {
-		var arr = [];
 		var lines = data.toString().split("\n");
 		var lineSplit;
 		lines.forEach(function (line) {
@@ -50,7 +49,28 @@ module.exports = {
 				}
 			}
 		});
-
+	},
+	// import a book and see sort the words into an object sorted by sylbs. 
+	getWordsFromBook: function (data) {
+		var wordsFromBook = {};
+		// remove "\n", space, and commas
+		var booksWords = data.toString().split("\n").join().split(" ").join().split(",");
+		// loop over the cmudict library, and see if words from the book can be found inside the library
+		// problem is looping the library object takes very long time, so I cannot import a very long text(book) to compare with the library. Want to know if there's a better way to do it.
+		for (var sylbs in module.exports.library) {
+			module.exports.library[sylbs].forEach(function (guidWord) {
+				booksWords.forEach(function (bookWord) {
+					if (guidWord.toLowerCase() === bookWord.toLowerCase()) {
+						if (!wordsFromBook[sylbs]) {
+							wordsFromBook[sylbs] = [];
+							wordsFromBook[sylbs].push(bookWord.toUpperCase());
+						} else {
+							wordsFromBook[sylbs].push(bookWord.toUpperCase());
+						}
+					}
+				});
+			});
+		}
+		return wordsFromBook;
 	}
-
 }
