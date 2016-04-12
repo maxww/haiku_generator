@@ -3,14 +3,25 @@ var fs = require("fs");
 
 module.exports = {
 	library: {},
-	createHaiku: function (structure) {
+	createHaiku: function (structure, sylbsArr) {
 		var finalHaiku = [];
 		structure.forEach(function (line) {
 			line.forEach(function (sylbs) {
 				var randomPosition = function () {
-					return Math.floor(Math.random() * (module.exports.library[sylbs].length - 1 + 0 + 1) + 0);
+					// if user decides to put in their own syllabels array
+					if (sylbsArr) {
+						return Math.floor(Math.random() * (sylbsArr[sylbs].length - 1 + 0 + 1) + 0);
+					} else {
+						// we can generate the poem from our words library too
+						return Math.floor(Math.random() * (module.exports.library[sylbs].length - 1 + 0 + 1) + 0);
+					}
 				}
-				finalHaiku.push(module.exports.library[sylbs][randomPosition()]);
+				if (sylbsArr) {
+					finalHaiku.push(sylbsArr[sylbs][randomPosition()]);
+				} else {
+					finalHaiku.push(module.exports.library[sylbs][randomPosition()]);
+				}
+
 			})
 		});
 		console.log(finalHaiku.join("\n"));
