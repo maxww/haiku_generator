@@ -5,14 +5,14 @@ module.exports = {
 	library: {},
 	createHaiku: function (structure) {
 		var finalHaiku = [];
-		for (var i = 0; i < structure.length; i++) {
-			for (var j = 0; j < structure[i].length; j++) {
+		structure.forEach(function (line) {
+			line.forEach(function (sylbs) {
 				var randomPosition = function () {
-					return Math.floor(Math.random() * (module.exports.library[structure[i][j]].length - 1 + 0 + 1) + 0);
+					return Math.floor(Math.random() * (module.exports.library[sylbs].length - 1 + 0 + 1) + 0);
 				}
-				finalHaiku.push(module.exports.library[structure[i][j]][randomPosition()]);
-			}
-		}
+				finalHaiku.push(module.exports.library[sylbs][randomPosition()]);
+			})
+		});
 		console.log(finalHaiku.join("\n"));
 	},
 	readCmudictFile: function (file) {
